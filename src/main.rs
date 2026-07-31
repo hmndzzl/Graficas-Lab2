@@ -21,12 +21,12 @@ fn conway_step(fb: &mut Framebuffer) {
                     if dx == 0 && dy == 0 {
                         continue;
                     }
-                    let nx = x as isize + dx;
-                    let ny = y as isize + dy;
-                    if nx >= 0 && nx < width as isize && ny >= 0 && ny < height as isize {
-                        if fb.get_color(nx as usize, ny as usize) == alive_color {
-                            live_neighbors += 1;
-                        }
+                    // Toroidal loop (wrap around edges)
+                    let nx = (x as isize + dx).rem_euclid(width as isize) as usize;
+                    let ny = (y as isize + dy).rem_euclid(height as isize) as usize;
+                    
+                    if fb.get_color(nx, ny) == alive_color {
+                        live_neighbors += 1;
                     }
                 }
             }
@@ -50,30 +50,153 @@ fn conway_step(fb: &mut Framebuffer) {
     }
 }
 
+// Helper function to easily draw organisms using strings
+fn draw_pattern(fb: &mut Framebuffer, x_offset: usize, y_offset: usize, pattern: &[&str]) {
+    for (y, row) in pattern.iter().enumerate() {
+        for (x, ch) in row.chars().enumerate() {
+            if ch == '*' {
+                fb.point(x_offset + x, y_offset + y);
+            }
+        }
+    }
+}
+
+use minifb::{Key, Window, WindowOptions};
+use std::time::Duration;
+
 fn main() {
-    let mut framebuffer = Framebuffer::new(100, 100);
+    let window_width = 800;
+    let window_height = 600;
+    let framebuffer_width = 100;
+    let framebuffer_height = 100;
+
+    let mut framebuffer = Framebuffer::new(framebuffer_width, framebuffer_height);
+
+    let mut window = Window::new(
+        "Conway's Game of Life",
+        window_width,
+        window_height,
+        WindowOptions::default(),
+    )
+    .unwrap();
 
     framebuffer.set_background_color(0x000000);
     framebuffer.clear();
 
     framebuffer.set_current_color(0xFFFFFF);
 
-    // Initial pattern (Glider)
-    let cx = 400;
-    let cy = 300;
-    framebuffer.point(cx + 1, cy);
-    framebuffer.point(cx + 2, cy + 1);
-    framebuffer.point(cx, cy + 2);
-    framebuffer.point(cx + 1, cy + 2);
-    framebuffer.point(cx + 2, cy + 2);
+    // --- Still Lifes ---
+    let block = [
+        "**",
+        "**"
+    ];
+    let beehive = [
+        " ** ",
+        "*  *",
+        " ** "
+    ];
+    let loaf = [
+        " ** ",
+        "*  *",
+        " * *",
+        "  * "
+    ];
+    let boat = [
+        "** ",
+        "* *",
+        " **"
+    ];
 
-    // You can uncomment the loop below to generate multiple steps,
-    // or run a single step. We will run 10 steps as a demo.
-    for _ in 0..10 {
+    // --- Oscillators ---
+    let blinker = [
+        "***",
+    ];
+    let toad = [
+        " ***",
+        "*** "
+    ];
+    let beacon = [
+        "**  ",
+        "**  ",
+        "  **",
+        "  **"
+    ];
+    let pulsar = [
+        "  ***   ***  ",
+        "             ",
+        "*    * *    *",
+        "*    * *    *",
+        "*    * *    *",
+        "  ***   ***  ",
+        "             ",
+        "  ***   ***  ",
+        "*    * *    *",
+        "*    * *    *",
+        "*    * *    *",
+        "             ",
+        "  ***   ***  "
+    ];
+
+    // --- Spaceships ---
+    let glider = [
+        " * ",
+        "  *",
+        "***"
+    ];
+    let lwss = [
+        " *  *",
+        "    *",
+        "*   *",
+        " ****"
+    ];
+    let mwss = [
+        "   *  ",
+        " *   *",
+        "     *",
+        " *   *",
+        "  ****"
+    ];
+
+    // --- Gosper Glider Gun ---
+    let gosper_glider_gun = [
+        "                                    ",
+        "                        *           ",
+        "                      * *           ",
+        "            **      **            **",
+        "           *   *    **            **",
+        "**        *     *   **              ",
+        "**        *   * **    * *           ",
+        "          *     *       *           ",
+        "           *   *                    ",
+        "            **                      "
+    ];
+
+    // Draw all patterns on the framebuffer
+    draw_pattern(&mut framebuffer, 5, 5, &block);
+    draw_pattern(&mut framebuffer, 15, 5, &beehive);
+    draw_pattern(&mut framebuffer, 25, 5, &loaf);
+    draw_pattern(&mut framebuffer, 35, 5, &boat);
+
+    draw_pattern(&mut framebuffer, 5, 15, &blinker);
+    draw_pattern(&mut framebuffer, 15, 15, &toad);
+    draw_pattern(&mut framebuffer, 25, 15, &beacon);
+    draw_pattern(&mut framebuffer, 40, 15, &pulsar);
+
+    draw_pattern(&mut framebuffer, 10, 35, &glider);
+    draw_pattern(&mut framebuffer, 10, 50, &lwss);
+    draw_pattern(&mut framebuffer, 10, 65, &mwss);
+
+    draw_pattern(&mut framebuffer, 50, 40, &gosper_glider_gun);
+
+    let frame_delay = Duration::from_millis(100);
+
+    while window.is_open() && !window.is_key_down(Key::Escape) {
         conway_step(&mut framebuffer);
+
+        window
+            .update_with_buffer(&framebuffer.buffer, framebuffer_width, framebuffer_height)
+            .unwrap();
+
+        std::thread::sleep(frame_delay);
     }
-
-    let _ = framebuffer.render_buffer("output.bmp");
-
-    println!("Framebuffer rendered to output.bmp");
 } 

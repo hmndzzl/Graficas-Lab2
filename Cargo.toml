@@ -8,3 +8,4 @@ opt-level = 3
 debug = false
 
 [dependencies]
+minifb = "0.28.0"
