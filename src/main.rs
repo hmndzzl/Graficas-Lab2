@@ -4,7 +4,6 @@ mod bmp;
 mod scanlinefill;
 
 use crate::framebuffer::Framebuffer;
-use crate::bmp::WriteBmp;
 
 fn conway_step(fb: &mut Framebuffer) {
     let width = fb.width;
@@ -171,22 +170,26 @@ fn main() {
         "            **                      "
     ];
 
-    // Draw all patterns on the framebuffer
-    draw_pattern(&mut framebuffer, 5, 5, &block);
-    draw_pattern(&mut framebuffer, 15, 5, &beehive);
-    draw_pattern(&mut framebuffer, 25, 5, &loaf);
-    draw_pattern(&mut framebuffer, 35, 5, &boat);
+    let w = framebuffer.width;
+    let h = framebuffer.height;
 
-    draw_pattern(&mut framebuffer, 5, 15, &blinker);
-    draw_pattern(&mut framebuffer, 15, 15, &toad);
-    draw_pattern(&mut framebuffer, 25, 15, &beacon);
-    draw_pattern(&mut framebuffer, 40, 15, &pulsar);
+    // Draw all patterns on the framebuffer, spreading them out proportionally
+    draw_pattern(&mut framebuffer, 50 * w / 100, 10 * h / 100, &loaf);
+    draw_pattern(&mut framebuffer, 85 * w / 100, 80 * h / 100, &block);
+    draw_pattern(&mut framebuffer, 70 * w / 100, 30 * h / 100, &beehive);
+    draw_pattern(&mut framebuffer, 20 * w / 100, 45 * h / 100, &boat);
 
-    draw_pattern(&mut framebuffer, 10, 35, &glider);
-    draw_pattern(&mut framebuffer, 10, 50, &lwss);
-    draw_pattern(&mut framebuffer, 10, 65, &mwss);
+    draw_pattern(&mut framebuffer, 85 * w / 100, 45 * h / 100, &blinker);
+    draw_pattern(&mut framebuffer, 65 * w / 100, 55 * h / 100, &toad);
+    draw_pattern(&mut framebuffer, 10 * w / 100, 70 * h / 100, &beacon);
+    draw_pattern(&mut framebuffer, 85 * w / 100, 5 * h / 100, &pulsar); 
 
-    draw_pattern(&mut framebuffer, 50, 40, &gosper_glider_gun);
+    draw_pattern(&mut framebuffer, 25 * w / 100, 60 * h / 100, &glider);
+    draw_pattern(&mut framebuffer, 10 * w / 100, 85 * h / 100, &lwss);
+    draw_pattern(&mut framebuffer, 40 * w / 100, 85 * h / 100, &mwss);
+
+    // This gun shoots gliders down-right
+    draw_pattern(&mut framebuffer, 5 * w / 100, 10 * h / 100, &gosper_glider_gun);
 
     let frame_delay = Duration::from_millis(100);
 
