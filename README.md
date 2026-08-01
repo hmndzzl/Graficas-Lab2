@@ -6,9 +6,8 @@ Una implementación completa y psicodélica del clásico autómata celular **"El
 
 ## 📸 Demo
 
-*(¡Sustituye esta imagen por un GIF de tu simulación!)*
+<img width="800" height="600" alt="Conways game of life" src="https://github.com/user-attachments/assets/a8475a71-5a2d-4a97-96f0-112ee785d833" />
 
-![Demo del Juego de la Vida](./demo.gif)
 
 ## 🚀 Características Principales
 
